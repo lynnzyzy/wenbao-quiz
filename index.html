@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>重庆文保知识问答</title>
+<style>
+:root {
+  --primary: #8B4513;
+  --primary-light: #A0522D;
+  --accent: #D4A574;
+  --accent-light: #E8C9A0;
+  --bg: #FAF6F0;
+  --card-bg: #FFFFFF;
+  --text: #2C1810;
+  --text-light: #6B5544;
+  --correct: #2E7D32;
+  --correct-bg: #E8F5E9;
+  --wrong: #C62828;
+  --wrong-bg: #FFEBEE;
+  --border: #DCC9B8;
+  --star: #E8A317;
+  --selected: #1565C0;
+  --selected-bg: #E3F2FD;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body {
+  font-family: "Noto Serif SC", "Songti SC", "SimSun", serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.8;
+  -webkit-tap-highlight-color: transparent;
+}
+body { max-width: 480px; margin: 0 auto; min-height: 100vh; }
+
+/* ========== 首页 ========== */
+#home-view { padding: 0; }
+.home-header {
+  text-align: center;
+  padding: 60px 24px 40px;
+  background: linear-gradient(135deg, var(--primary), var(--primary-light));
+  color: #fff;
+}
+.home-header h1 { font-size: 1.75rem; margin-bottom: 10px; letter-spacing: 2px; }
+.home-header p { font-size: 1rem; opacity: 0.85; }
+.home-modules { padding: 24px 20px; }
+.module-card {
+  display: block;
+  text-decoration: none;
+  color: var(--text);
+  background: var(--card-bg);
+  border-radius: 12px;
+  padding: 28px 24px;
+  margin-bottom: 20px;
+  border: 1px solid var(--border);
+  border-left: 5px solid var(--accent);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+  transition: transform 0.2s, box-shadow 0.2s;
+  cursor: pointer;
+}
+.module-card:active {
+  transform: scale(0.98);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.12);
+}
+.module-card.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.module-card.disabled:active {
+  transform: none;
+}
+.module-icon { font-size: 2.2rem; margin-bottom: 12px; }
+.module-card h2 { font-size: 1.4rem; color: var(--primary); margin-bottom: 8px; }
+.module-card p { font-size: 1rem; color: var(--text-light); }
+.module-meta { margin-top: 14px; }
+.module-meta span {
+  display: inline-block;
+  padding: 4px 14px;
+  border-radius: 16px;
+  background: #F5E6D3;
+  color: var(--primary);
+  margin-right: 8px;
+  margin-bottom: 6px;
+  font-size: 0.9rem;
+}
+.module-card.disabled .module-meta span {
+  background: #E0E0E0;
+  color: #999;
+}
+.home-footer {
+  text-align: center;
+  padding: 24px 20px 40px;
+  color: var(--text-light);
+  font-size: 0.95rem;
+}
+
+/* ========== 答题页 ========== */
+#quiz-view { padding: 0; }
+.quiz-progress {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 16px 0;
+}
+.quiz-back {
+  font-size: 1.5rem;
+  color: var(--primary);
+  text-decoration: none;
+  cursor: pointer;
+  min-width: 40px;
+}
+.quiz-progress-bar {
+  flex: 1;
+  height: 10px;
+  background: var(--border);
+  border-radius: 5px;
+  margin: 0 12px;
+  overflow: hidden;
+}
+.quiz-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--primary));
+  border-radius: 5px;
+  transition: width 0.3s ease;
+}
+.quiz-progress-text {
+  font-size: 1rem;
+  color: var(--text-light);
+  font-weight: bold;
+  min-width: 50px;
+  text-align: right;
+}
+.quiz-card {
+  background: var(--card-bg);
+  border-radius: 12px;
+  padding: 28px 24px;
+  margin: 16px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+  border: 1px solid var(--border);
+  border-left: 5px solid var(--accent);
+}
+.quiz-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.quiz-id { font-size: 1rem; color: var(--text-light); font-weight: bold; }
+.quiz-tags { display: flex; gap: 8px; flex-wrap: wrap; }
+.quiz-tag {
+  font-size: 0.9rem;
+  padding: 4px 14px;
+  border-radius: 16px;
+  background: #F5E6D3;
+  color: var(--primary);
+}
+.quiz-tag.hook { background: #FCE4EC; color: #AD1457; }
+.quiz-body {
+  font-size: 1.15rem;
+  margin-bottom: 24px;
+  color: var(--text);
+  line-height: 1.7;
+}
+.quiz-options { list-style: none; }
+.quiz-options li {
+  padding: 18px 20px;
+  margin-bottom: 12px;
+  border-radius: 10px;
+  background: var(--bg);
+  border: 2px solid var(--border);
+  font-size: 1.05rem;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.quiz-options li:active {
+  background: #FFF3E0;
+  border-color: var(--accent);
+}
+.quiz-options li.selected {
+  background: var(--selected-bg);
+  border-color: var(--selected);
+}
+.quiz-options li.correct-answer {
+  background: var(--correct-bg);
+  border-color: var(--correct);
+}
+.quiz-options li.wrong-answer {
+  background: var(--wrong-bg);
+  border-color: var(--wrong);
+}
+.opt-label {
+  flex-shrink: 0;
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1rem; font-weight: bold;
+}
+.quiz-options li.selected .opt-label { background: var(--selected); }
+.quiz-options li.correct-answer .opt-label { background: var(--correct); }
+.quiz-options li.wrong-answer .opt-label { background: var(--wrong); }
+
+.quiz-nav {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 28px;
+  gap: 12px;
+}
+.quiz-nav-btn {
+  flex: 1;
+  padding: 16px 20px;
+  border-radius: 10px;
+  border: 2px solid var(--border);
+  background: var(--card-bg);
+  color: var(--text);
+  font-size: 1.05rem;
+  font-family: inherit;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.15s;
+}
+.quiz-nav-btn:active {
+  transform: scale(0.98);
+}
+.quiz-nav-btn.next {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+}
+.quiz-nav-btn:disabled { opacity: 0.4; cursor: default; }
+
+/* 答案解析弹层 */
+.quiz-explain {
+  margin-top: 20px;
+  padding: 20px;
+  background: #FFF8E1;
+  border-radius: 10px;
+  border-left: 4px solid var(--star);
+  font-size: 1rem;
+  color: var(--text);
+  line-height: 1.7;
+  display: none;
+}
+.quiz-explain.show { display: block; }
+.quiz-explain .explain-label {
+  font-weight: bold;
+  color: var(--star);
+  margin-bottom: 6px;
+  font-size: 0.95rem;
+}
+
+/* ========== 得分页 ========== */
+#score-view { padding: 0; }
+.score-header {
+  text-align: center;
+  padding: 50px 24px 30px;
+  background: linear-gradient(135deg, var(--primary), var(--primary-light));
+  color: #fff;
+}
+.score-header h1 { font-size: 1.6rem; margin-bottom: 8px; letter-spacing: 2px; }
+.score-header p { font-size: 1rem; opacity: 0.85; }
+.score-body { padding: 30px 24px; }
+.score-circle {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 200px; height: 200px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--star), var(--accent));
+  color: #fff;
+  margin: 0 auto 30px;
+  box-shadow: 0 6px 20px rgba(139,69,19,0.3);
+}
+.score-num { font-size: 4rem; font-weight: bold; line-height: 1; }
+.score-total { font-size: 1.5rem; opacity: 0.85; }
+.score-label-text { font-size: 1rem; margin-top: 8px; opacity: 0.85; }
+.score-comment {
+  font-size: 1.1rem;
+  color: var(--primary);
+  margin-bottom: 30px;
+  padding: 20px 24px;
+  background: #FFF8E1;
+  border-radius: 10px;
+  border-left: 4px solid var(--star);
+  text-align: left;
+  line-height: 1.7;
+}
+.score-breakdown {
+  background: var(--card-bg);
+  border-radius: 12px;
+  padding: 24px 20px;
+  margin-bottom: 30px;
+  border: 1px solid var(--border);
+  text-align: left;
+}
+.score-breakdown h3 {
+  font-size: 1.2rem;
+  color: var(--primary);
+  margin-bottom: 16px;
+  border-left: 4px solid var(--accent);
+  padding-left: 12px;
+}
+.breakdown-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 1rem;
+}
+.breakdown-item:last-child { border-bottom: none; }
+.breakdown-item .b-num { color: var(--text-light); flex: 1; }
+.breakdown-item .b-result { font-weight: bold; white-space: nowrap; margin-left: 12px; }
+.breakdown-item .b-result.correct { color: var(--correct); }
+.breakdown-item .b-result.wrong { color: var(--wrong); }
+.score-actions { margin-top: 30px; }
+.score-btn {
+  display: block;
+  width: 100%;
+  padding: 18px;
+  border-radius: 10px;
+  font-size: 1.1rem;
+  font-family: inherit;
+  cursor: pointer;
+  text-decoration: none;
+  text-align: center;
+  margin-bottom: 12px;
+  transition: all 0.15s;
+}
+.score-btn:active { transform: scale(0.98); }
+.score-btn.primary {
+  background: var(--primary);
+  color: #fff;
+  border: 2px solid var(--primary);
+}
+.score-btn.secondary {
+  background: var(--card-bg);
+  color: var(--text);
+  border: 2px solid var(--border);
+}
+.score-footer {
+  text-align: center;
+  padding: 24px 20px 40px;
+  color: var(--text-light);
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+</style>
+</head>
+<body>
+
+<!-- ========== 首页 ========== -->
+<div id="home-view">
+  <div class="home-header">
+    <h1>重庆文保知识问答</h1>
+    <p>选择一个知识问答模块开始答题</p>
+  </div>
+  <div class="home-modules">
+    <div class="module-card" onclick="startQuiz('nanbinlu')">
+      <div class="module-icon">🏛️</div>
+      <h2>南滨路开埠知识问答</h2>
+      <p>立德乐洋行 · 蒲兰田公馆 · 安达森洋行 · 卜内门洋行 · 挺进报旧址……</p>
+      <div class="module-meta">
+        <span>15题</span>
+        <span>满分15分</span>
+        <span>南岸区</span>
+      </div>
+    </div>
+    <div class="module-card disabled">
+      <div class="module-icon">🏘️</div>
+      <h2>中山四路知识问答</h2>
+      <p>抗战陪都遗迹 · 名人公馆 · 历史建筑……</p>
+      <div class="module-meta">
+        <span>敬请期待</span>
+      </div>
+    </div>
+    <div class="module-card disabled">
+      <div class="module-icon">🛤️</div>
+      <h2>三层马路知识问答</h2>
+      <p>城市文化导览 · 山城立体交通 · 文化遗存……</p>
+      <div class="module-meta">
+        <span>敬请期待</span>
+      </div>
+    </div>
+  </div>
+  <div class="home-footer">
+    重庆文保知识问答 · 文保爱好者趣味题库
+  </div>
+</div>
+
+<!-- ========== 答题页 ========== -->
+<div id="quiz-view" style="display:none;">
+  <div class="quiz-progress">
+    <span class="quiz-back" onclick="goHome()">←</span>
+    <div class="quiz-progress-bar"><div class="quiz-progress-fill" id="progressFill" style="width:0%"></div></div>
+    <span class="quiz-progress-text" id="progressText">1/15</span>
+  </div>
+  <div class="quiz-card" id="quizCard">
+    <!-- JS动态渲染 -->
+  </div>
+</div>
+
+<!-- ========== 得分页 ========== -->
+<div id="score-view" style="display:none;">
+  <div class="score-header">
+    <h1>答题完成</h1>
+    <p id="scoreSubtitle">南滨路开埠知识问答 · 共15题</p>
+  </div>
+  <div class="score-body">
+    <div class="score-circle">
+      <span class="score-num" id="scoreNum">0</span>
+      <span class="score-total">/15</span>
+      <span class="score-label-text">满分15分</span>
+    </div>
+    <div class="score-comment" id="scoreComment"></div>
+    <div class="score-breakdown">
+      <h3>答题详情</h3>
+      <div id="breakdownList"></div>
+    </div>
+    <div class="score-actions">
+      <a class="score-btn primary" href="javascript:reviewWrong();">查看错题解析</a>
+      <a class="score-btn secondary" href="javascript:goHome();">返回首页</a>
+    </div>
+    <div class="score-footer">
+      重庆文保知识问答 · 南滨路开埠知识问答<br>
+      所有知识点均提取自《南滨路开埠遗迹讲解词》
+    </div>
+  </div>
+</div>
+
+<script>
+// ========== 题目数据 ==========
+var questions = [
+  {
+    id: 1,
+    building: "立德乐洋行",
+    hook: "反转",
+    body: "1895年，立德乐洋行想在重庆南岸租下\"九湾十八堡\"地皮，但清政府规定外国人不能在中国境内购置地产。立德乐是怎么\"绕开\"这条禁令的？",
+    options: [
+      "以英国商人本人身份直接向清政府申请",
+      "以买办（中国人）的名义向大地主周成基永租",
+      "通过清政府官员代购后转让",
+      "以传教士身份申请教会用地"
+    ],
+    answer: 1,
+    explain: "立德乐用买办的名义向\"周八老爷\"永租地皮——名为中国人的地，实为英国商人的产业。\"上有政策，下有对策\"的清末版。"
+  },
+  {
+    id: 2,
+    building: "立德乐洋行",
+    hook: "冲击力",
+    body: "1898年，立德乐洋行的创始人乘一艘小火轮试航川江成功，成为到达重庆的第一艘外国机动商船，结束了川江只有木船的历史。这艘船叫什么名字？",
+    options: ["蜀通号", "利川号", "蜀亨号", "瑞和号"],
+    answer: 1,
+    explain: "利川号首航川江成功后，外国商船与炮舰接踵而至，重庆近代化历程由此开启。一艘船，结束了一个时代。"
+  },
+  {
+    id: 3,
+    building: "立德乐洋行",
+    hook: "彩蛋",
+    body: "2006年重庆在朝天门为100位历史名人塑像纪念，其中有一位是英国商人——他被《大不列颠名人录》誉为\"开发中国西部第1人\"，在重庆南岸开办了立德乐洋行。他是谁？",
+    options: ["白耳理", "立德乐", "安达森", "蒲兰田"],
+    answer: 1,
+    explain: "一个英国商人被重庆人塑像纪念，与99位中国历史名人并列朝天门——这个\"开发中国西部第1人\"的称号，是中国人给的。"
+  },
+  {
+    id: 4,
+    building: "蒲兰田公馆",
+    hook: "人物",
+    body: "1900年，一位英国航海家驾驶商用蒸汽轮船成功穿越长江三峡到达重庆，成为打通宜昌到重庆川江航道的第一人。重庆人亲切地称他为\"蒲领江\"——他的公馆至今保存在南岸枣子湾10号。他是谁？",
+    options: ["立德乐", "蒲兰田", "白耳理", "安达森"],
+    answer: 1,
+    explain: "\"蒲\"取自姓Plant的音译，\"领江\"就是引水员——姓+职业，重庆人给老外起名就是这么接地气。蒲兰田公馆后来还被美国使馆租作酒吧。"
+  },
+  {
+    id: 5,
+    building: "蒲兰田公馆",
+    hook: "彩蛋",
+    body: "蒲兰田公馆的主人蒲兰田在川江工作28年，建立信号台、制定行船章程、撰写航行指南，培养了川江第一批有执照的领江。1924年，哪个地方政府在新滩为他设立了纪念碑？",
+    options: ["重庆市南岸区政府", "湖北秭归县政府", "四川宜宾县政府", "江苏南京市政府"],
+    answer: 1,
+    explain: "一个外国人在中国被县政府立碑纪念，这在近代中国极为罕见——蒲兰田用28年为川江航运做出了实在贡献，当地人用石头记住了他。"
+  },
+  {
+    id: 6,
+    building: "龙门浩老街",
+    hook: "反常识",
+    body: "道光年间，巴县乡绅摩春瀛捐巨资购制木船36只，在龙门浩老街附近开设了一个\"义渡\"，过江不收渡资，从1834年一直坚持到1941年。这个免费渡口叫什么？",
+    options: ["海棠义渡", "黄葛义渡", "龙门义渡", "玄坛义渡"],
+    answer: 0,
+    explain: "义渡就是\"过江不收渡资\"——摩春瀛捐36只木船义务摆渡，免费了整整107年。这在当时相当于自费修了一座\"免费大桥\"。"
+  },
+  {
+    id: 7,
+    building: "永兴洋行高管住宅旧址",
+    hook: "反转",
+    body: "永兴洋行高管住宅旧址位于董家桥21号，当地老百姓叫它\"洋房子\"。重庆大资本家黄锡滋就是在这栋洋房里与法国商人策划了一个\"假合资\"方案——法方不出一分钱，中方反而每年倒交三万两白银。这个\"合资\"成立的航运公司叫什么？",
+    options: ["聚福洋行", "福记航运部", "强华公司", "永兴洋行"],
+    answer: 0,
+    explain: "法方不出资占\"干股\"，中方每年倒交3万两\"挂旗费\"——但挂法国旗能免缴厘金和苛捐杂税，川江上88.86%的商船都挂外国旗。这栋\"洋房子\"是\"假合资\"的策源地。"
+  },
+  {
+    id: 8,
+    building: "安达森洋行",
+    hook: "彩蛋",
+    body: "安达森洋行位于南滨路海狮路2号，是瑞典人安达森创建的6座仓库，砖木结构、土墙砖墙混用，依山而建，外观不起眼。但抗战时期，这组\"不起眼的仓库\"保存了来自故宫的多少箱文物？",
+    options: ["1000多箱", "2000多箱", "3000多箱", "4000多箱"],
+    answer: 3,
+    explain: "一个瑞典人在重庆慈云寺旁边修了6座土墙仓库，怎么看都像普通货栈——但故宫选了这里存放4000多箱国宝文物，因为越是\"不起眼\"的地方越安全。"
+  },
+  {
+    id: 9,
+    building: "《挺进报》旧址",
+    hook: "反转",
+    body: "在《挺进报》旧址，陈然不用油印机印刷地下报纸，而是用图钉把蜡纸钉在桌上，用一种打磨光滑的日常物品代替滚筒蘸油墨刮印——印完后烧掉它不留痕迹。他用的是什么？",
+    options: ["木板", "竹片", "铁片", "石块"],
+    answer: 1,
+    explain: "陈然把竹片打磨光滑当滚筒用，一张蜡纸最终能印1000份报纸，印完烧掉竹片不留痕迹——没有设备，就用智慧补。这就是《挺进报》在陈然家中印制的秘密。"
+  },
+  {
+    id: 10,
+    building: "《挺进报》旧址",
+    hook: "反转",
+    body: "《挺进报》旧址的陈然烈士有一首广为流传的\"红色经典\"诗《我的\"自白\"书》，长期被认为是他在狱中临刑前所作。但罗广斌后来承认，这首诗的真实来历是什么？",
+    options: [
+      "陈然在白公馆狱中亲笔写下",
+      "后人根据陈然事迹集体创作，因用真名被误收为遗诗",
+      "从国民党报纸上缴获的战歌",
+      "陈然被捕前口述、战友笔录"
+    ],
+    answer: 1,
+    explain: "广为流传的\"烈士遗诗\"其实是后人集体创作——罗广斌承认他们在写《在烈火中永生》时\"由几个人共同创作的\"，因用了真名真姓被编者误以为是遗作收录。"
+  },
+  {
+    id: 11,
+    building: "卜内门洋行",
+    hook: "彩蛋",
+    body: "卜内门洋行位于周家湾61号，建于1915年。这家英资化工企业1903年在重庆卖\"洋碱粉\"和肥皂，后来改名\"帝国化学工业公司\"（ICI）。如今它变身成了我们熟知的一个家居品牌。是哪个品牌？",
+    options: ["立邦漆", "多乐士油漆", "3M", "杜邦"],
+    answer: 1,
+    explain: "100年前在重庆南岸卖肥皂和碱粉的卜内门，现在是多乐士油漆。1991年又重新启用了\"卜内门\"这个最初的名字——你家墙上的漆，祖上是在重庆卖肥皂的。"
+  },
+  {
+    id: 12,
+    building: "卜内门洋行",
+    hook: "反转",
+    body: "卜内门洋行在重庆推销\"洋碱粉\"并开办肥皂厂，本来是要赚重庆人的钱，结果反而催生了一个意外效应，催生了本土产业。这个\"意外效应\"是什么？",
+    options: [
+      "重庆人不再买洋碱粉，卜内门亏损撤出",
+      "重庆人学会了造肥皂，本土产业从零到23家",
+      "重庆肥皂出口到东南亚市场",
+      "卜内门与本地商人合营改制"
+    ],
+    answer: 1,
+    explain: "卜内门本来是来卖肥皂赚钱的，结果反而教会了重庆人造肥皂——从零到23家。外来资本\"无心插柳\"催生本土产业，这是经济史上的反转。"
+  },
+  {
+    id: 13,
+    building: "武昌中华大学旧址",
+    hook: "冲击力",
+    body: "武昌中华大学旧址位于下浩米市街29号，清代是湖广移民修建的禹王宫。这栋建筑经历了堪称传奇的\"七次变身\"：庙宇→英商白理洋行仓库→空军幼校→武昌中华大学→两湖中学→裕德染厂→国营南岸针织厂。其中\"武昌中华大学\"在抗战结束后回迁武昌，后来改名成为了哪所大学？",
+    options: ["武汉大学", "华中师范大学", "复旦大学", "中央大学"],
+    answer: 1,
+    explain: "禹王宫一栋建筑经历了七次变身，如果建筑有简历够写一本重庆近现代史。而抗战时借禹王宫办学的武昌中华大学，回迁武昌后1953年更名为华中师范学院，1985年更名为华中师范大学。"
+  },
+  {
+    id: 14,
+    building: "周家湾200号",
+    hook: "彩蛋",
+    body: "周家湾200号当地人称为\"孙家公馆\"，曾为法国人居住，后由一位官员接手。这栋中西合璧建筑的入口牌楼是哥特式尖顶，屋顶却是中式硬山顶——这种中西\"混搭\"风格使它被哪部电视剧选为拍摄地？",
+    options: ["《红岩》", "《一双绣花鞋》", "《江姐》", "《雾都茫茫》"],
+    answer: 1,
+    explain: "周家湾200号的哥特式尖顶配中式硬山顶、圆形砖柱配砖砌券拱——这种\"混搭\"恰恰是重庆开埠建筑的真实面貌，也因此被《一双绣花鞋》选中取景。建筑被划入开发项目后居民搬出，建筑得以保留。"
+  },
+  {
+    id: 15,
+    building: "白理洋行旧址",
+    hook: "彩蛋",
+    body: "白理洋行旧址位于董家桥清水溪石岩上，建于1911年。白理洋行的买办黄云陔几年间成为重庆城有名的大富豪，在南岸和重庆城置下大量房产。其中南岸的\"黄山\"是他的祖传家产——这座黄山后来因什么而闻名？",
+    options: [
+      "抗战时期蒋介石官邸所在地",
+      "重庆最早的温泉疗养地",
+      "清代巴县最大的盐商庄园",
+      "民国时期法国领事馆驻地"
+    ],
+    answer: 0,
+    explain: "以抗战时期蒋介石官邸闻名的南岸黄山，最初是白理洋行买办黄云陔的祖传家产。从洋行买办到\"拥有黄山\"——再后来黄山成了抗战指挥中心，人生跨度之大令人咋舌。"
+  }
+];
+
+// ========== 状态管理 ==========
+var currentQ = 0;
+var userAnswers = [];
+var viewMode = "quiz";
+
+// ========== 视图切换 ==========
+function showView(viewName) {
+  document.getElementById("home-view").style.display = (viewName === "home") ? "block" : "none";
+  document.getElementById("quiz-view").style.display = (viewName === "quiz") ? "block" : "none";
+  document.getElementById("score-view").style.display = (viewName === "score") ? "block" : "none";
+  window.scrollTo(0, 0);
+}
+
+function goHome() {
+  currentQ = 0;
+  userAnswers = [];
+  viewMode = "quiz";
+  showView("home");
+}
+
+function startQuiz(module) {
+  currentQ = 0;
+  userAnswers = [];
+  viewMode = "quiz";
+  showView("quiz");
+  renderQuestion();
+}
+
+// ========== 渲染题目 ==========
+function renderQuestion() {
+  var q = questions[currentQ];
+  var progress = ((currentQ + 1) / questions.length * 100).toFixed(1);
+  document.getElementById("progressFill").style.width = progress + "%";
+  document.getElementById("progressText").textContent = (currentQ + 1) + "/" + questions.length;
+
+  var selected = userAnswers[currentQ];
+  var answered = (selected !== undefined);
+  var isReview = (viewMode === "review");
+
+  var html = '';
+  html += '<div class="quiz-header">';
+  html += '<span class="quiz-id">第 ' + String(currentQ + 1).padStart(2, '0') + ' 题</span>';
+  html += '<div class="quiz-tags">';
+  html += '<span class="quiz-tag">' + q.building + '</span>';
+  html += '<span class="quiz-tag hook">' + q.hook + '</span>';
+  html += '</div>';
+  html += '</div>';
+  html += '<div class="quiz-body">' + q.body + '</div>';
+  html += '<ul class="quiz-options">';
+
+  for (var i = 0; i < q.options.length; i++) {
+    var cls = "";
+    var label = String.fromCharCode(65 + i);
+    if (answered || isReview) {
+      if (i === q.answer) {
+        cls = "correct-answer";
+      } else if (i === selected) {
+        cls = "wrong-answer";
+      }
+    } else if (i === selected) {
+      cls = "selected";
+    }
+    html += '<li class="' + cls + '" onclick="selectAnswer(' + i + ')" data-idx="' + i + '">';
+    html += '<span class="opt-label">' + label + '</span>';
+    html += '<span>' + q.options[i] + '</span>';
+    html += '</li>';
+  }
+  html += '</ul>';
+
+  // 答案解析
+  if (answered || isReview) {
+    html += '<div class="quiz-explain show">';
+    html += '<div class="explain-label">💡 趣味解析</div>';
+    html += q.explain;
+    html += '</div>';
+  }
+
+  // 导航按钮
+  html += '<div class="quiz-nav">';
+  if (currentQ > 0) {
+    html += '<button class="quiz-nav-btn" onclick="prevQuestion()">← 上一题</button>';
+  } else {
+    html += '<button class="quiz-nav-btn" disabled>← 上一题</button>';
+  }
+  if (currentQ < questions.length - 1) {
+    html += '<button class="quiz-nav-btn next" onclick="nextQuestion()" ' + (answered ? '' : 'disabled') + '>下一题 →</button>';
+  } else {
+    if (viewMode === "review") {
+      html += '<button class="quiz-nav-btn next" onclick="goHome()">完成回顾 →</button>';
+    } else {
+      html += '<button class="quiz-nav-btn next" onclick="finishQuiz()" ' + (answered ? '' : 'disabled') + '>查看成绩 →</button>';
+    }
+  }
+  html += '</div>';
+
+  document.getElementById("quizCard").innerHTML = html;
+}
+
+// ========== 答题逻辑 ==========
+function selectAnswer(idx) {
+  if (userAnswers[currentQ] !== undefined) return;
+  userAnswers[currentQ] = idx;
+  renderQuestion();
+}
+
+function prevQuestion() {
+  if (currentQ > 0) {
+    currentQ--;
+    renderQuestion();
+    window.scrollTo(0, 0);
+  }
+}
+
+function nextQuestion() {
+  if (userAnswers[currentQ] === undefined) return;
+  if (currentQ < questions.length - 1) {
+    currentQ++;
+    renderQuestion();
+    window.scrollTo(0, 0);
+  }
+}
+
+function finishQuiz() {
+  var score = 0;
+  for (var i = 0; i < questions.length; i++) {
+    if (userAnswers[i] === questions[i].answer) score++;
+  }
+  showScore(score);
+}
+
+// ========== 得分页 ==========
+function showScore(score) {
+  showView("score");
+  document.getElementById("scoreNum").textContent = score;
+
+  var comment = "";
+  if (score >= 14) {
+    comment = "👏 太厉害了！你是真正的文保达人。每一栋老建筑的故事你都如数家珍。";
+  } else if (score >= 11) {
+    comment = "👍 不错！你对南滨路开埠遗迹的知识掌握得很好。答错的题可以回顾趣味解析，每道题都有\"涨知识\"的收获。";
+  } else if (score >= 7) {
+    comment = "💪 还不错！你已经了解了南滨路文保建筑的基本知识。再看看解析，下次一定能拿高分。";
+  } else {
+    comment = "📚 别灰心！每道题的趣味解析都值得一读。了解这些文保建筑的故事，本身就是一次有收获的旅程。";
+  }
+  document.getElementById("scoreComment").textContent = comment;
+
+  // 答题详情
+  var listHtml = "";
+  for (var i = 0; i < questions.length; i++) {
+    var correct = (userAnswers[i] === questions[i].answer);
+    var cls = correct ? "correct" : "wrong";
+    var icon = correct ? "✓ 正确" : "✗ 错误";
+    listHtml += '<div class="breakdown-item">';
+    listHtml += '<span class="b-num">第' + String(i + 1).padStart(2, '0') + '题 · ' + questions[i].building + '</span>';
+    listHtml += '<span class="b-result ' + cls + '">' + icon + '</span>';
+    listHtml += '</div>';
+  }
+  document.getElementById("breakdownList").innerHTML = listHtml;
+}
+
+// ========== 错题回顾 ==========
+function reviewWrong() {
+  viewMode = "review";
+  currentQ = 0;
+  showView("quiz");
+  renderQuestion();
+}
+</script>
+
+</body>
+</html>

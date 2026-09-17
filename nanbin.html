@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>南滨路开埠知识问答</title>
+<style>
+:root {
+  --primary: #8B4513;
+  --primary-light: #A0522D;
+  --accent: #D4A574;
+  --accent-light: #E8C9A0;
+  --bg: #FAF6F0;
+  --card-bg: #FFFFFF;
+  --text: #2C1810;
+  --text-light: #6B5544;
+  --correct: #2E7D32;
+  --correct-bg: #E8F5E9;
+  --wrong: #C62828;
+  --wrong-bg: #FFEBEE;
+  --border: #DCC9B8;
+  --star: #E8A317;
+  --selected: #1565C0;
+  --selected-bg: #E3F2FD;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body {
+  font-family: "Noto Serif SC", "Songti SC", "SimSun", serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.8;
+  -webkit-tap-highlight-color: transparent;
+}
+body { max-width: 480px; margin: 0 auto; min-height: 100vh; }
+
+/* ========== 加载状态 ========== */
+#loading-view {
+  padding: 80px 24px;
+  text-align: center;
+  color: var(--text-light);
+  font-size: 1.1rem;
+}
+
+/* ========== 答题页 ========== */
+#quiz-view { padding: 0; }
+.quiz-module-name {
+  text-align: center;
+  padding: 14px 16px 4px;
+  font-size: 0.95rem;
+  color: var(--text-light);
+}
+.quiz-progress {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 16px 0;
+}
+.quiz-back {
+  font-size: 1.5rem;
+  color: var(--primary);
+  text-decoration: none;
+  cursor: pointer;
+  min-width: 40px;
+}
+.quiz-progress-bar {
+  flex: 1;
+  height: 10px;
+  background: var(--border);
+  border-radius: 5px;
+  margin: 0 12px;
+  overflow: hidden;
+}
+.quiz-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--primary));
+  border-radius: 5px;
+  transition: width 0.3s ease;
+}
+.quiz-progress-text {
+  font-size: 1rem;
+  color: var(--text-light);
+  font-weight: bold;
+  min-width: 50px;
+  text-align: right;
+}
+.quiz-card {
+  background: var(--card-bg);
+  border-radius: 12px;
+  padding: 28px 24px;
+  margin: 16px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+  border: 1px solid var(--border);
+  border-left: 5px solid var(--accent);
+}
+.quiz-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.quiz-id { font-size: 1rem; color: var(--text-light); font-weight: bold; }
+.quiz-tags { display: flex; gap: 8px; flex-wrap: wrap; }
+.quiz-tag {
+  font-size: 0.9rem;
+  padding: 4px 14px;
+  border-radius: 16px;
+  background: #F5E6D3;
+  color: var(--primary);
+}
+.quiz-tag.hook { background: #FCE4EC; color: #AD1457; }
+.quiz-body {
+  font-size: 1.15rem;
+  margin-bottom: 24px;
+  color: var(--text);
+  line-height: 1.7;
+}
+.quiz-options { list-style: none; }
+.quiz-options li {
+  padding: 18px 20px;
+  margin-bottom: 12px;
+  border-radius: 10px;
+  background: var(--bg);
+  border: 2px solid var(--border);
+  font-size: 1.05rem;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.quiz-options li:active {
+  background: #FFF3E0;
+  border-color: var(--accent);
+}
+.quiz-options li.selected {
+  background: var(--selected-bg);
+  border-color: var(--selected);
+}
+.quiz-options li.correct-answer {
+  background: var(--correct-bg);
+  border-color: var(--correct);
+}
+.quiz-options li.wrong-answer {
+  background: var(--wrong-bg);
+  border-color: var(--wrong);
+}
+.opt-label {
+  flex-shrink: 0;
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1rem; font-weight: bold;
+}
+.quiz-options li.selected .opt-label { background: var(--selected); }
+.quiz-options li.correct-answer .opt-label { background: var(--correct); }
+.quiz-options li.wrong-answer .opt-label { background: var(--wrong); }
+
+.quiz-nav {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 28px;
+  gap: 12px;
+}
+.quiz-nav-btn {
+  flex: 1;
+  padding: 16px 20px;
+  border-radius: 10px;
+  border: 2px solid var(--border);
+  background: var(--card-bg);
+  color: var(--text);
+  font-size: 1.05rem;
+  font-family: inherit;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.15s;
+}
+.quiz-nav-btn:active {
+  transform: scale(0.98);
+}
+.quiz-nav-btn.next {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+}
+.quiz-nav-btn:disabled { opacity: 0.4; cursor: default; }
+
+.quiz-explain {
+  margin-top: 20px;
+  padding: 20px;
+  background: #FFF8E1;
+  border-radius: 10px;
+  border-left: 4px solid var(--star);
+  font-size: 1rem;
+  color: var(--text);
+  line-height: 1.7;
+  display: none;
+}
+.quiz-explain.show { display: block; }
+.quiz-explain .explain-label {
+  font-weight: bold;
+  color: var(--star);
+  margin-bottom: 6px;
+  font-size: 0.95rem;
+}
+
+/* ========== 得分页 ========== */
+#score-view { padding: 0; }
+.score-header {
+  text-align: center;
+  padding: 50px 24px 30px;
+  background: linear-gradient(135deg, var(--primary), var(--primary-light));
+  color: #fff;
+}
+.score-header h1 { font-size: 1.6rem; margin-bottom: 8px; letter-spacing: 2px; }
+.score-header p { font-size: 1rem; opacity: 0.85; }
+.score-body { padding: 30px 24px; }
+.score-circle {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 200px; height: 200px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--star), var(--accent));
+  color: #fff;
+  margin: 0 auto 30px;
+  box-shadow: 0 6px 20px rgba(139,69,19,0.3);
+}
+.score-num { font-size: 4rem; font-weight: bold; line-height: 1; }
+.score-total { font-size: 1.5rem; opacity: 0.85; }
+.score-label-text { font-size: 1rem; margin-top: 8px; opacity: 0.85; }
+.score-comment {
+  font-size: 1.1rem;
+  color: var(--primary);
+  margin-bottom: 30px;
+  padding: 20px 24px;
+  background: #FFF8E1;
+  border-radius: 10px;
+  border-left: 4px solid var(--star);
+  text-align: left;
+  line-height: 1.7;
+}
+.score-breakdown {
+  background: var(--card-bg);
+  border-radius: 12px;
+  padding: 24px 20px;
+  margin-bottom: 30px;
+  border: 1px solid var(--border);
+  text-align: left;
+}
+.score-breakdown h3 {
+  font-size: 1.2rem;
+  color: var(--primary);
+  margin-bottom: 16px;
+  border-left: 4px solid var(--accent);
+  padding-left: 12px;
+}
+.breakdown-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 1rem;
+}
+.breakdown-item:last-child { border-bottom: none; }
+.breakdown-item .b-num { color: var(--text-light); flex: 1; }
+.breakdown-item .b-result { font-weight: bold; white-space: nowrap; margin-left: 12px; }
+.breakdown-item .b-result.correct { color: var(--correct); }
+.breakdown-item .b-result.wrong { color: var(--wrong); }
+.score-actions { margin-top: 30px; }
+.score-btn {
+  display: block;
+  width: 100%;
+  padding: 18px;
+  border-radius: 10px;
+  font-size: 1.1rem;
+  font-family: inherit;
+  cursor: pointer;
+  text-decoration: none;
+  text-align: center;
+  margin-bottom: 12px;
+  transition: all 0.15s;
+}
+.score-btn:active { transform: scale(0.98); }
+.score-btn.primary {
+  background: var(--primary);
+  color: #fff;
+  border: 2px solid var(--primary);
+}
+.score-btn.secondary {
+  background: var(--card-bg);
+  color: var(--text);
+  border: 2px solid var(--border);
+}
+.score-footer {
+  text-align: center;
+  padding: 24px 20px 40px;
+  color: var(--text-light);
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+</style>
+</head>
+<body>
+
+<!-- ========== 加载状态 ========== -->
+<div id="loading-view">正在加载题目数据……</div>
+
+<!-- ========== 答题页 ========== -->
+<div id="quiz-view" style="display:none;">
+  <div class="quiz-module-name" id="moduleName"></div>
+  <div class="quiz-progress">
+    <a class="quiz-back" href="index.html">←</a>
+    <div class="quiz-progress-bar"><div class="quiz-progress-fill" id="progressFill" style="width:0%"></div></div>
+    <span class="quiz-progress-text" id="progressText">1/1</span>
+  </div>
+  <div class="quiz-card" id="quizCard">
+    <!-- JS动态渲染 -->
+  </div>
+</div>
+
+<!-- ========== 得分页 ========== -->
+<div id="score-view" style="display:none;">
+  <div class="score-header">
+    <h1>答题完成</h1>
+    <p id="scoreSubtitle"></p>
+  </div>
+  <div class="score-body">
+    <div class="score-circle">
+      <span class="score-num" id="scoreNum">0</span>
+      <span class="score-total" id="scoreTotal">/1</span>
+      <span class="score-label-text" id="scoreLabelText">满分1分</span>
+    </div>
+    <div class="score-comment" id="scoreComment"></div>
+    <div class="score-breakdown">
+      <h3>答题详情</h3>
+      <div id="breakdownList"></div>
+    </div>
+    <div class="score-actions">
+      <a class="score-btn primary" href="javascript:reviewWrong();">查看错题解析</a>
+      <a class="score-btn secondary" href="javascript:restartQuiz();">重新作答</a>
+      <a class="score-btn secondary" href="index.html">返回首页</a>
+    </div>
+    <div class="score-footer" id="scoreFooter"></div>
+  </div>
+</div>
+
+<script>
+// ========== 模块加载 ==========
+var moduleId = "nanbin";
+
+(function() {
+  var script = document.createElement("script");
+  script.src = "data/" + moduleId + ".js";
+  script.onload = initQuiz;
+  script.onerror = function() {
+    document.getElementById("loading-view").textContent = "题目数据加载失败，请刷新重试";
+  };
+  document.head.appendChild(script);
+})();
+
+// ========== 状态管理 ==========
+var DATA = null;
+var currentQ = 0;
+var userAnswers = [];
+var viewMode = "quiz";
+
+function initQuiz() {
+  DATA = window.QUIZ_DATA;
+  document.title = DATA.title + " - 重庆文保知识问答";
+  document.getElementById("moduleName").textContent = DATA.icon + " " + DATA.title;
+  document.getElementById("loading-view").style.display = "none";
+  document.getElementById("quiz-view").style.display = "block";
+  renderQuestion();
+}
+
+// ========== 视图切换 ==========
+function showView(viewName) {
+  document.getElementById("quiz-view").style.display = (viewName === "quiz") ? "block" : "none";
+  document.getElementById("score-view").style.display = (viewName === "score") ? "block" : "none";
+  document.getElementById("loading-view").style.display = "none";
+  window.scrollTo(0, 0);
+}
+
+function restartQuiz() {
+  currentQ = 0;
+  userAnswers = [];
+  viewMode = "quiz";
+  showView("quiz");
+  renderQuestion();
+}
+
+// ========== 渲染题目 ==========
+function renderQuestion() {
+  var questions = DATA.questions;
+  var q = questions[currentQ];
+  var progress = ((currentQ + 1) / questions.length * 100).toFixed(1);
+  document.getElementById("progressFill").style.width = progress + "%";
+  document.getElementById("progressText").textContent = (currentQ + 1) + "/" + questions.length;
+
+  var selected = userAnswers[currentQ];
+  var answered = (selected !== undefined);
+  var isReview = (viewMode === "review");
+
+  var html = '';
+  html += '<div class="quiz-header">';
+  html += '<span class="quiz-id">第 ' + String(currentQ + 1).padStart(2, '0') + ' 题</span>';
+  html += '<div class="quiz-tags">';
+  html += '<span class="quiz-tag">' + q.building + '</span>';
+  html += '<span class="quiz-tag hook">' + q.hook + '</span>';
+  html += '</div>';
+  html += '</div>';
+  html += '<div class="quiz-body">' + q.body + '</div>';
+  html += '<ul class="quiz-options">';
+
+  for (var i = 0; i < q.options.length; i++) {
+    var cls = "";
+    var label = String.fromCharCode(65 + i);
+    if (answered || isReview) {
+      if (i === q.answer) {
+        cls = "correct-answer";
+      } else if (i === selected) {
+        cls = "wrong-answer";
+      }
+    } else if (i === selected) {
+      cls = "selected";
+    }
+    html += '<li class="' + cls + '" onclick="selectAnswer(' + i + ')" data-idx="' + i + '">';
+    html += '<span class="opt-label">' + label + '</span>';
+    html += '<span>' + q.options[i] + '</span>';
+    html += '</li>';
+  }
+  html += '</ul>';
+
+  if (answered || isReview) {
+    html += '<div class="quiz-explain show">';
+    html += '<div class="explain-label">💡 趣味解析</div>';
+    html += q.explain;
+    html += '</div>';
+  }
+
+  html += '<div class="quiz-nav">';
+  if (currentQ > 0) {
+    html += '<button class="quiz-nav-btn" onclick="prevQuestion()">← 上一题</button>';
+  } else {
+    html += '<button class="quiz-nav-btn" disabled>← 上一题</button>';
+  }
+  if (currentQ < questions.length - 1) {
+    html += '<button class="quiz-nav-btn next" onclick="nextQuestion()" ' + (answered ? '' : 'disabled') + '>下一题 →</button>';
+  } else {
+    if (viewMode === "review") {
+      html += '<button class="quiz-nav-btn next" onclick="restartQuiz()">完成回顾 →</button>';
+    } else {
+      html += '<button class="quiz-nav-btn next" onclick="finishQuiz()" ' + (answered ? '' : 'disabled') + '>查看成绩 →</button>';
+    }
+  }
+  html += '</div>';
+
+  document.getElementById("quizCard").innerHTML = html;
+}
+
+// ========== 答题逻辑 ==========
+function selectAnswer(idx) {
+  if (userAnswers[currentQ] !== undefined) return;
+  userAnswers[currentQ] = idx;
+  renderQuestion();
+}
+
+function prevQuestion() {
+  if (currentQ > 0) {
+    currentQ--;
+    renderQuestion();
+    window.scrollTo(0, 0);
+  }
+}
+
+function nextQuestion() {
+  if (userAnswers[currentQ] === undefined) return;
+  if (currentQ < DATA.questions.length - 1) {
+    currentQ++;
+    renderQuestion();
+    window.scrollTo(0, 0);
+  }
+}
+
+function finishQuiz() {
+  var score = 0;
+  for (var i = 0; i < DATA.questions.length; i++) {
+    if (userAnswers[i] === DATA.questions[i].answer) score++;
+  }
+  showScore(score);
+}
+
+// ========== 得分页 ==========
+function showScore(score) {
+  var total = DATA.questions.length;
+  showView("score");
+  document.getElementById("scoreNum").textContent = score;
+  document.getElementById("scoreTotal").textContent = "/" + total;
+  document.getElementById("scoreLabelText").textContent = "满分" + total + "分";
+  document.getElementById("scoreSubtitle").textContent = DATA.title + " · 共" + total + "题";
+  document.getElementById("scoreFooter").innerHTML = "重庆文保知识问答 · " + DATA.title + "<br>所有知识点均提取自" + DATA.source;
+
+  var ratio = score / total;
+  var comment;
+  if (ratio >= 0.9) {
+    comment = DATA.comments[0];
+  } else if (ratio >= 0.7) {
+    comment = DATA.comments[1];
+  } else if (ratio >= 0.4) {
+    comment = DATA.comments[2];
+  } else {
+    comment = DATA.comments[3];
+  }
+  document.getElementById("scoreComment").textContent = comment;
+
+  var listHtml = "";
+  for (var i = 0; i < total; i++) {
+    var correct = (userAnswers[i] === DATA.questions[i].answer);
+    var cls = correct ? "correct" : "wrong";
+    var icon = correct ? "✓ 正确" : "✗ 错误";
+    listHtml += '<div class="breakdown-item">';
+    listHtml += '<span class="b-num">第' + String(i + 1).padStart(2, '0') + '题 · ' + DATA.questions[i].building + '</span>';
+    listHtml += '<span class="b-result ' + cls + '">' + icon + '</span>';
+    listHtml += '</div>';
+  }
+  document.getElementById("breakdownList").innerHTML = listHtml;
+}
+
+// ========== 错题回顾 ==========
+function reviewWrong() {
+  viewMode = "review";
+  currentQ = 0;
+  showView("quiz");
+  renderQuestion();
+}
+</script>
+
+</body>
+</html>

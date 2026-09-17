@@ -207,6 +207,67 @@ body { max-width: 480px; margin: 0 auto; min-height: 100vh; }
   font-size: 0.95rem;
 }
 
+/* ========== 封面屏 ========== */
+#cover-view {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 40px 28px;
+}
+.cover-inner { max-width: 420px; width: 100%; }
+.cover-icon { font-size: 4rem; margin-bottom: 20px; }
+.cover-title {
+  font-size: 2rem;
+  color: var(--primary);
+  letter-spacing: 3px;
+  margin-bottom: 22px;
+}
+.cover-intro {
+  font-size: 1.1rem;
+  color: var(--text-light);
+  line-height: 1.9;
+  margin-bottom: 14px;
+  padding: 0 6px;
+}
+.cover-meta { margin-bottom: 36px; }
+.cover-meta span {
+  display: inline-block;
+  padding: 5px 16px;
+  border-radius: 16px;
+  background: #F5E6D3;
+  color: var(--primary);
+  margin: 0 5px 8px;
+  font-size: 0.9rem;
+}
+.cover-start {
+  display: block;
+  width: 100%;
+  max-width: 300px;
+  margin: 0 auto;
+  padding: 18px;
+  border-radius: 10px;
+  border: 2px solid var(--primary);
+  background: linear-gradient(135deg, var(--primary), var(--primary-light));
+  color: #fff;
+  font-size: 1.2rem;
+  font-family: inherit;
+  letter-spacing: 4px;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(139,69,19,0.35);
+  transition: all 0.15s;
+}
+.cover-start:active { transform: scale(0.97); }
+.cover-back {
+  display: inline-block;
+  margin-top: 22px;
+  color: var(--text-light);
+  font-size: 0.95rem;
+  text-decoration: none;
+}
+
 /* ========== 得分页 ========== */
 #score-view { padding: 0; }
 .score-header {
@@ -308,6 +369,18 @@ body { max-width: 480px; margin: 0 auto; min-height: 100vh; }
 </head>
 <body>
 
+<!-- ========== 封面屏 ========== -->
+<div id="cover-view" style="display:none;">
+  <div class="cover-inner">
+    <div class="cover-icon" id="coverIcon"></div>
+    <h1 class="cover-title" id="coverTitle"></h1>
+    <p class="cover-intro" id="coverIntro"></p>
+    <div class="cover-meta" id="coverMeta"></div>
+    <button class="cover-start" onclick="startQuiz()">开始答题</button>
+    <a class="cover-back" href="index.html">← 返回首页</a>
+  </div>
+</div>
+
 <!-- ========== 加载状态 ========== -->
 <div id="loading-view">正在加载题目数据……</div>
 
@@ -374,9 +447,25 @@ function initQuiz() {
   DATA = window.QUIZ_DATA;
   document.title = DATA.title + " - 重庆文保知识问答";
   document.getElementById("moduleName").textContent = DATA.icon + " " + DATA.title;
+  document.getElementById("coverIcon").textContent = DATA.icon;
+  document.getElementById("coverTitle").textContent = DATA.title;
+  document.getElementById("coverIntro").textContent = DATA.intro;
+  document.getElementById("coverMeta").innerHTML =
+    '<span>' + DATA.questions.length + '题</span>' +
+    '<span>满分' + DATA.questions.length + '分</span>' +
+    '<span>' + DATA.region + '</span>';
   document.getElementById("loading-view").style.display = "none";
+  document.getElementById("cover-view").style.display = "flex";
+}
+
+function startQuiz() {
+  document.getElementById("cover-view").style.display = "none";
   document.getElementById("quiz-view").style.display = "block";
+  currentQ = 0;
+  userAnswers = [];
+  viewMode = "quiz";
   renderQuestion();
+  window.scrollTo(0, 0);
 }
 
 // ========== 视图切换 ==========
